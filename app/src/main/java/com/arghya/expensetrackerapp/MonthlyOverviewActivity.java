@@ -23,11 +23,13 @@ import java.util.Locale;
 
 public class MonthlyOverviewActivity extends AppCompatActivity {
     private Spinner monthSpinner;
+    private Spinner filterSpinner;
     private TextView monthlyIncomeTextView, monthlyExpenseTextView, monthlyBalanceTextView;
     private ListView monthlyTransactionListView;
     private DatabaseHelper dbHelper;
-    private int currentYear;
-    private int currentMonth;
+    private int selectedYear;
+    private int selectedMonth;
+    private String currentFilter = "All";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +37,7 @@ public class MonthlyOverviewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_monthly_overview);
 
         monthSpinner = findViewById(R.id.monthSpinner);
+        filterSpinner = findViewById(R.id.filterSpinner);
         monthlyIncomeTextView = findViewById(R.id.monthlyIncomeTextView);
         monthlyExpenseTextView = findViewById(R.id.monthlyExpenseTextView);
         monthlyBalanceTextView = findViewById(R.id.monthlyBalanceTextView);
@@ -45,25 +48,41 @@ public class MonthlyOverviewActivity extends AppCompatActivity {
         // Set up month spinner
         setupMonthSpinner();
 
+        // Set up filter spinner
+        setupFilterSpinner();
+
         // Set initial data
         Calendar calendar = Calendar.getInstance();
-        currentYear = calendar.get(Calendar.YEAR);
-        currentMonth = calendar.get(Calendar.MONTH) + 1;
-        updateMonthlyData(currentYear, currentMonth);
+        selectedYear = calendar.get(Calendar.YEAR);
+        selectedMonth = calendar.get(Calendar.MONTH) + 1;
+        updateMonthlyData();
 
         monthSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String[] dateParts = parent.getItemAtPosition(position).toString().split(" ");
-                int selectedMonth = getMonthNumber(dateParts[0]);
-                int selectedYear = Integer.parseInt(dateParts[1]);
-                updateMonthlyData(selectedYear, selectedMonth);
+                selectedMonth = getMonthNumber(dateParts[0]);
+                selectedYear = Integer.parseInt(dateParts[1]);
+                updateMonthlyData();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+
+        filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentFilter = parent.getItemAtPosition(position).toString();
+                updateTransactionList();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
     }
 
     private void setupMonthSpinner() {
@@ -81,39 +100,54 @@ public class MonthlyOverviewActivity extends AppCompatActivity {
         monthSpinner.setAdapter(adapter);
     }
 
-    private void updateMonthlyData(int year, int month) {
-        double monthlyIncome = dbHelper.getMonthlyTotalIncome(year, month);
-        double monthlyExpense = dbHelper.getMonthlyTotalExpense(year, month);
+    private void setupFilterSpinner() {
+        List<String> filters = new ArrayList<>();
+        filters.add("All");
+        filters.add("Income");
+        filters.add("Expense");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, filters);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        filterSpinner.setAdapter(adapter);
+    }
+
+    private void updateMonthlyData() {
+        double monthlyIncome = dbHelper.getMonthlyTotalIncome(selectedYear, selectedMonth);
+        double monthlyExpense = dbHelper.getMonthlyTotalExpense(selectedYear, selectedMonth);
         double monthlyBalance = monthlyIncome - monthlyExpense;
 
         monthlyIncomeTextView.setText(String.format("Income: ₹%.2f", monthlyIncome));
         monthlyExpenseTextView.setText(String.format("Expense: ₹%.2f", monthlyExpense));
         monthlyBalanceTextView.setText(String.format("Balance: ₹%.2f", monthlyBalance));
 
-        updateTransactionList(year, month);
+        updateTransactionList();
     }
 
-    private void updateTransactionList(int year, int month) {
+    private void updateTransactionList() {
         ArrayList<HashMap<String, String>> transactionList = new ArrayList<>();
-        Cursor incomeCursor = dbHelper.getMonthlyIncomeData(year, month);
-        Cursor expenseCursor = dbHelper.getMonthlyExpenseData(year, month);
+        Cursor incomeCursor = dbHelper.getMonthlyIncomeData(selectedYear, selectedMonth);
+        Cursor expenseCursor = dbHelper.getMonthlyExpenseData(selectedYear, selectedMonth);
 
-        while (incomeCursor.moveToNext()) {
-            HashMap<String, String> transaction = new HashMap<>();
-            transaction.put("type", "Income");
-            transaction.put("amount", "+" + incomeCursor.getDouble(1));
-            transaction.put("reason", incomeCursor.getString(2));
-            transaction.put("time", formatDate(incomeCursor.getLong(3)));
-            transactionList.add(transaction);
+        if (currentFilter.equals("All") || currentFilter.equals("Income")) {
+            while (incomeCursor.moveToNext()) {
+                HashMap<String, String> transaction = new HashMap<>();
+                transaction.put("type", "Income");
+                transaction.put("amount", "+" + incomeCursor.getDouble(1));
+                transaction.put("reason", incomeCursor.getString(2));
+                transaction.put("time", formatDate(incomeCursor.getLong(3)));
+                transactionList.add(transaction);
+            }
         }
 
-        while (expenseCursor.moveToNext()) {
-            HashMap<String, String> transaction = new HashMap<>();
-            transaction.put("type", "Expense");
-            transaction.put("amount", "-" + expenseCursor.getDouble(1));
-            transaction.put("reason", expenseCursor.getString(2));
-            transaction.put("time", formatDate(expenseCursor.getLong(3)));
-            transactionList.add(transaction);
+        if (currentFilter.equals("All") || currentFilter.equals("Expense")) {
+            while (expenseCursor.moveToNext()) {
+                HashMap<String, String> transaction = new HashMap<>();
+                transaction.put("type", "Expense");
+                transaction.put("amount", "-" + expenseCursor.getDouble(1));
+                transaction.put("reason", expenseCursor.getString(2));
+                transaction.put("time", formatDate(expenseCursor.getLong(3)));
+                transactionList.add(transaction);
+            }
         }
 
         SimpleAdapter adapter = new SimpleAdapter(
