@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
 //    }
 
     private void updateRecentTransactions() {
-        List<HashMap<String, String>> recentTransactions = dbHelper.getRecentTransactions(4);
+        List<HashMap<String, String>> recentTransactions = dbHelper.getRecentTransactions(5);
         RecentTransactionsAdapter adapter = new RecentTransactionsAdapter(recentTransactions);
         recentTransactionsRecyclerView.setAdapter(adapter);
     }
@@ -195,7 +195,10 @@ public class MainActivity extends AppCompatActivity {
         public void onBindViewHolder(ViewHolder holder, int position) {
             HashMap<String, String> transaction = transactions.get(position);
             holder.reasonTextView.setText(transaction.get("reason"));
-            holder.amountTextView.setText("₹" + transaction.get("amount"));
+
+            String amountText = transaction.get("amount");
+            String prefix = transaction.get("type").equals("income") ? "+" : "-";
+            holder.amountTextView.setText(prefix + " ₹" + amountText);
 
             if (transaction.get("type").equals("income")) {
                 holder.amountTextView.setTextColor(getResources().getColor(android.R.color.holo_green_dark));

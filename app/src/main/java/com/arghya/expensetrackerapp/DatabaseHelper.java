@@ -174,13 +174,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //    ======================================= Get All Income Data  ======================================================
     public Cursor getAllIncomeData() {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM income ORDER BY id DESC", null);
+        return db.rawQuery("SELECT * FROM income ORDER BY time DESC", null);
     }
 
     //    ======================================= Get All Expense Data  ======================================================
     public Cursor getAllExpenseData() {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM expense ORDER BY id DESC", null);
+        return db.rawQuery("SELECT * FROM expense ORDER BY time DESC", null);
     }
 
     //    ======================================= Delete Expense ==============================================================
