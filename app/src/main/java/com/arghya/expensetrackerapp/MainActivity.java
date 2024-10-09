@@ -1,6 +1,7 @@
 package com.arghya.expensetrackerapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         recentTransactionsRecyclerView = findViewById(R.id.recentTransactionsRecyclerView);
         dbHelper = new DatabaseHelper(this);
 
-        Button monthlyOverviewButton = findViewById(R.id.monthlyOverviewButton);
+        TextView monthlyOverviewButton = findViewById(R.id.monthlyOverviewButton);
         monthlyOverviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,7 +57,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        recentTransactionsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recentTransactionsRecyclerView = findViewById(R.id.recentTransactionsRecyclerView);
+        int spanCount = 1; // Number of columns in the grid
+        GridLayoutManager layoutManager = new GridLayoutManager(this, spanCount);
+        recentTransactionsRecyclerView.setLayoutManager(layoutManager);
 
         addIncome.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -187,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_recent_transaction, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_transaction_card, parent, false);
             return new ViewHolder(view);
         }
 
@@ -200,11 +204,11 @@ public class MainActivity extends AppCompatActivity {
             String prefix = transaction.get("type").equals("income") ? "+" : "-";
             holder.amountTextView.setText(prefix + " ₹" + amountText);
 
-            if (transaction.get("type").equals("income")) {
-                holder.amountTextView.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
-            } else {
-                holder.amountTextView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-            }
+//            if (transaction.get("type").equals("income")) {
+//                holder.amountTextView.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+//            } else {
+//                holder.amountTextView.setTextColor(getResources().getColor(android.R.color.black));
+//            }
 
             try {
                 long timeMillis = Double.valueOf(transaction.get("time")).longValue();

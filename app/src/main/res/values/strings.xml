@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Khoroch</string>
+    <string name="underlined_text"><u>View history</u></string>
 </resources>
