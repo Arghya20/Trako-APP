@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FDFFEF"
+    android:background="#f4f5ff"
     android:orientation="vertical"
     tools:context=".ShowAllData">
 
@@ -24,9 +24,10 @@
             android:layout_marginTop="8dp"
             android:gravity="center"
             android:text="Income Overview"
-            android:textColor="#000"
+            android:textColor="#ffffff"
             android:textSize="28sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            />
 
         <TextView
             android:id="@+id/lastUpdatedTime"
@@ -35,7 +36,7 @@
             android:layout_marginTop="4dp"
             android:gravity="center"
             android:text="Last updated: Never"
-            android:textColor="#666666"
+            android:textColor="#AAAAAD"
             android:textSize="14sp" />
 
     </LinearLayout>
