@@ -18,6 +18,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +49,12 @@ public class MainActivity extends AppCompatActivity {
         addExpense = findViewById(R.id.addExpense);
         recentTransactionsRecyclerView = findViewById(R.id.recentTransactionsRecyclerView);
         dbHelper = new DatabaseHelper(this);
+        
+        // Set current month and year
+        TextView currentMonthYearTextView = findViewById(R.id.currentMonthYearTextView);
+        SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
+        String currentMonthYear = monthYearFormat.format(new Date());
+        currentMonthYearTextView.setText(currentMonthYear);
 
         TextView monthlyOverviewButton = findViewById(R.id.monthlyOverviewButton);
         monthlyOverviewButton.setOnClickListener(new View.OnClickListener() {
@@ -106,20 +113,38 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void TotalIncome() {
-        double newTotalIncome = dbHelper.getTotalIncome();
+        // Get current year and month for filtering
+        Calendar calendar = Calendar.getInstance();
+        int currentYear = calendar.get(Calendar.YEAR);
+        int currentMonth = calendar.get(Calendar.MONTH) + 1; // Calendar months are 0-based
+        
+        // Get monthly income instead of all-time income
+        double newTotalIncome = dbHelper.getMonthlyTotalIncome(currentYear, currentMonth);
         totalIncome.setText("₹" + Math.round(newTotalIncome));
         prevTotalIncome = newTotalIncome;
     }
 
     public void TotalExpense() {
-        double newTotalExpense = dbHelper.getTotalExpense();
+        // Get current year and month for filtering
+        Calendar calendar = Calendar.getInstance();
+        int currentYear = calendar.get(Calendar.YEAR);
+        int currentMonth = calendar.get(Calendar.MONTH) + 1; // Calendar months are 0-based
+        
+        // Get monthly expense instead of all-time expense
+        double newTotalExpense = dbHelper.getMonthlyTotalExpense(currentYear, currentMonth);
         totalExpense.setText("₹" + Math.round(newTotalExpense));
         prevTotalExpense = newTotalExpense;
     }
 
     public void TotalBalance() {
-        double newTotalIncome = dbHelper.getTotalIncome();
-        double newTotalExpense = dbHelper.getTotalExpense();
+        // Get current year and month for filtering
+        Calendar calendar = Calendar.getInstance();
+        int currentYear = calendar.get(Calendar.YEAR);
+        int currentMonth = calendar.get(Calendar.MONTH) + 1; // Calendar months are 0-based
+        
+        // Get monthly income and expense instead of all-time totals
+        double newTotalIncome = dbHelper.getMonthlyTotalIncome(currentYear, currentMonth);
+        double newTotalExpense = dbHelper.getMonthlyTotalExpense(currentYear, currentMonth);
         double newTotalBalance = newTotalIncome - newTotalExpense;
 
         totalBalance.setText("₹" + Math.round(newTotalBalance));

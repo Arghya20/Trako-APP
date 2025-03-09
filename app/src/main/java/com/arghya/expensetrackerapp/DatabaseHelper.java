@@ -203,12 +203,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<HashMap<String, String>> recentTransactions = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
+        // Get current year and month
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        int currentYear = calendar.get(java.util.Calendar.YEAR);
+        int currentMonth = calendar.get(java.util.Calendar.MONTH) + 1; // Calendar months are 0-based
+        
+        // Calculate start of current month
+        String startDate = currentYear + "-" + String.format("%02d", currentMonth) + "-01";
+        // Calculate start of next month
+        String endDate;
+        if (currentMonth == 12) {
+            endDate = (currentYear + 1) + "-01-01";
+        } else {
+            endDate = currentYear + "-" + String.format("%02d", currentMonth + 1) + "-01";
+        }
+
         String query = "SELECT 'income' AS type, id, amount, reason, time FROM income " +
+                "WHERE datetime(time/1000, 'unixepoch') >= datetime(?) " +
+                "AND datetime(time/1000, 'unixepoch') < datetime(?) " +
                 "UNION ALL " +
                 "SELECT 'expense' AS type, id, amount, reason, time FROM expense " +
+                "WHERE datetime(time/1000, 'unixepoch') >= datetime(?) " +
+                "AND datetime(time/1000, 'unixepoch') < datetime(?) " +
                 "ORDER BY time DESC LIMIT ?";
 
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(limit)});
+        Cursor cursor = db.rawQuery(query, new String[]{startDate, endDate, startDate, endDate, String.valueOf(limit)});
 
         if (cursor != null && cursor.moveToFirst()) {
             do {

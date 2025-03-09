@@ -5,6 +5,6 @@
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
         <item name="android:statusBarColor">@color/primary_blue</item>
         <item name="android:windowLightStatusBar">false</item>
-
+        <item name="android:fontFamily">@font/font_family</item>
     </style>
 </resources>

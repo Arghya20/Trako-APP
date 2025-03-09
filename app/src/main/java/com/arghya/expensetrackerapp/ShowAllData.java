@@ -24,6 +24,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,11 +57,15 @@ public class ShowAllData extends AppCompatActivity {
         listView = findViewById(R.id.listView);
         dbHelper = new DatabaseHelper(this);
 
+        // Get current month name for the title
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat monthFormat = new SimpleDateFormat("MMMM", Locale.getDefault());
+        String currentMonth = monthFormat.format(calendar.getTime());
+        
         if (Expense) {
-            showAllDataTitle.setText("Expense Overview");
+            showAllDataTitle.setText(currentMonth + " Expense Overview");
         } else {
-            showAllDataTitle.setText("Income Overview");
-
+            showAllDataTitle.setText(currentMonth + " Income Overview");
         }
         updateLastUpdatedTimeDisplay();
         loadData();
@@ -103,11 +108,16 @@ public class ShowAllData extends AppCompatActivity {
 
     public void loadData() {
         Cursor cursor = null;
+        
+        // Get current year and month
+        Calendar calendar = Calendar.getInstance();
+        int currentYear = calendar.get(Calendar.YEAR);
+        int currentMonth = calendar.get(Calendar.MONTH) + 1; // Calendar months are 0-based
 
         if (Expense) {
-            cursor = dbHelper.getAllExpenseData();
+            cursor = dbHelper.getMonthlyExpenseData(currentYear, currentMonth);
         } else {
-            cursor = dbHelper.getAllIncomeData();
+            cursor = dbHelper.getMonthlyIncomeData(currentYear, currentMonth);
         }
 
         if (cursor != null && cursor.getCount() > 0) {
